@@ -8,6 +8,18 @@ class Scorecard:
     def __init__(self) -> None:
         self.scores: Dict[Category, Optional[int]] = {cat: None for cat in Category}
 
+    def __str__(self) -> str:
+        lines = []
+        for category in Category:
+            score = self.scores[category]
+            score_str = str(score) if score is not None else "-"
+            lines.append(f"{category.code:<20} {score_str}")
+        lines.append("-" * 22)
+        lines.append(f"{'Upper Section Total':<20} {self.upper_section_score()}")
+        lines.append(f"{'Upper Section Bonus':<20} {'50' if self.upper_section_score() >= 63 else '0'}")
+        lines.append(f"{'Total Score':<20} {self.total_score()}\n\n")
+        return "\n".join(lines)
+
     def is_complete(self) -> bool:
         """Return True if all categories are filled."""
         return all(v is not None for v in self.scores.values())
@@ -20,8 +32,12 @@ class Scorecard:
         """Return the total score including upper section bonus."""
         base = sum(v or 0 for v in self.scores.values())
         if self.upper_section_score() >= 63:
-            base += 35
+            base += 50
         return base
+    
+    def has_bonus(self) -> bool:
+        """Return True if the upper section bonus has been achieved."""
+        return self.upper_section_score() >= 63
 
     def upper_section_score(self) -> int:
         """Return the subtotal for the upper section (ones–sixes)."""
@@ -39,7 +55,6 @@ class Scorecard:
         """Return the points this roll would score in the given category."""
         counts = {i: dice.count(i) for i in range(1, 7)}
         # Return the maximum possible score for the category
-
         if category == Category.ONES:
             return counts[1] * 1
         if category == Category.TWOS:
@@ -95,9 +110,6 @@ class Scorecard:
             if (score := self.score_for_category(dice, cat)) > 0
         }
     
-
-
-
     def print_scorecard(self):
         """Print the current state of the scorecard."""
         for category in Category:
@@ -106,5 +118,8 @@ class Scorecard:
             print(f"{category.name.replace('_', ' ').title():<20} {score_str}")
         print("-" * 22)
         print(f"{'Upper Section Total':<20} {self.upper_section_score()}")
-        print(f"{'Upper Section Bonus':<20} {'35' if self.upper_section_score() >= 63 else '0'}")
+        print(f"{'Upper Section Bonus':<20} {'50' if self.upper_section_score() >= 63 else '0'}")
+        print()
         print(f"{'Total Score':<20} {self.total_score()}")
+        print()
+        print('' * 40)
