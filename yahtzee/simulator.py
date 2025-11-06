@@ -4,6 +4,8 @@ from yahtzee.scorecard import Scorecard
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+
 
 from collections import Counter
 
@@ -16,19 +18,27 @@ from typing import List, Optional
 
 
 class Simulator:
-    def __init__(self, strategy: Strategy, number_of_games: int) -> None:
+    def __init__(self, strategy: Strategy, number_of_games: int, trace_history: bool = False) -> None:
         self.strategy = strategy
         self.number_of_games = number_of_games
+        self.trace_history = trace_history
+
         self.game_scorecards: List[Scorecard] = []
         self.scores = np.zeros(self.number_of_games, dtype=int)
 
 
     def run(self):
         for i in range(self.number_of_games):
+            print(f"Simulating game {i + 1} / {self.number_of_games}", end="\r")
             game = Game(self.strategy)
-            scorecard = game.play_game()
-            self.scores[i] = scorecard.total_score()
-            self.game_scorecards.append(scorecard)  # optional if you still want full scorecards
+            game.play_game()
+            self.scores[i] = game.scorecard.total_score()
+            self.game_scorecards.append(game.scorecard)  # optional if you still want full scorecards
+
+            if self.trace_history:
+                print(f"History for game {i + 1}:")
+                game.print_history()
+                print()
 
         self.save_results()
 
@@ -48,7 +58,8 @@ class Simulator:
     def standard_deviation(self) -> float:
         return float(np.std(self.scores)) if self.number_of_games > 0 else 0.0
 
-
+    def get_bonus_percentage(self) -> float:
+        return sum(1 for sc in self.game_scorecards if sc.has_bonus()) / self.number_of_games * 100 if self.number_of_games > 0 else 0.0
     
     def print_summary(self):
         print(f"Average score over {self.number_of_games} games: {self.average_score()}")
@@ -56,28 +67,88 @@ class Simulator:
         print(f"Worst score: {self.worst_score()}")
         print(f"Standard deviation: {self.standard_deviation()}")
         print(f"Median score: {self.median_score()}")
-
-
-    def plot_score_frequencies(self, bins: int = 100) -> plt.Figure:
+    
+    def _calculate_histogram_params(self, values: np.ndarray) -> tuple[int, int, int]:
         """
-        Plot a histogram of game scores showing the frequency distribution.
+        Calculate histogram parameters for given score values.
 
         Args:
-            bins: Number of bins to divide the scores into.
-        """
+            values: Array of score values.
 
-        # Convert scores to a NumPy array if not already
-        scores = np.array([scorecard.total_score() for scorecard in self.game_scorecards])
+        Returns:
+            Tuple (x_min, x_max, num_bins):
+                x_min: Minimum score - 5
+                x_max: Maximum score + 5
+                num_bins: Number of unique scores + 10
+        """
+        if len(values) == 0:
+            return 0, 0, 0
+
+        min_val = int(np.min(values))
+        max_val = int(np.max(values))
+        x_min = min_val - 5
+        x_max = max_val + 5
+        num_bins = len(np.unique(values)) + 10
+
+        return x_min, x_max, num_bins
+
+
+    def plot_upper_section_frequencies(self) -> Optional[plt.Figure]:
+        upper_scores = np.array([sc.upper_section_score() for sc in self.game_scorecards])
+        if len(upper_scores) == 0:
+            return None
+
+        x_min, x_max, num_bins = self._calculate_histogram_params(upper_scores)
 
         fig = plt.figure(figsize=(10, 6))
-        plt.hist(scores, bins=bins, color='skyblue', edgecolor='black')
+
+        # Get histogram data
+        counts, bin_edges = np.histogram(upper_scores, bins=num_bins, range=(x_min, x_max))
+
+        # Color bins differently depending on whether they are below/above 63
+        bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+        colors = ['orange' if center < 63 else 'lightgreen' for center in bin_centers]
+
+        plt.bar(bin_centers, counts, width=(bin_edges[1] - bin_edges[0]), 
+                color=colors, edgecolor='black')
+
+
+        plt.title(f"Upper Section Score Distribution over {self.number_of_games} Games")
+        plt.xlabel("Upper Section Score")
+        plt.ylabel("Frequency")
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.xticks(range(x_min, x_max + 1, 5))
+        ax = plt.gca()
+        ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins='auto', integer=True))
+        plt.tight_layout()
+        return fig
+
+
+
+    def plot_score_frequencies(self) -> Optional[plt.Figure]:
+        scores = np.array([scorecard.total_score() for scorecard in self.game_scorecards])
+        if len(scores) == 0:
+            return None
+
+        x_min, x_max, num_bins = self._calculate_histogram_params(scores)
+
+        fig = plt.figure(figsize=(10, 6))
+        plt.hist(
+            scores,
+            bins=num_bins,
+            range=(x_min, x_max),
+            color='lightgreen',
+            edgecolor='black'
+        )
         plt.title(f"Score Distribution over {self.number_of_games} Games")
         plt.xlabel("Score")
         plt.ylabel("Frequency")
         plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.xticks(range(x_min, x_max + 1, 10))
+        ax = plt.gca()
+        ax.yaxis.set_major_locator(mticker.MaxNLocator(nbins='auto', integer=True))
         plt.tight_layout()
-        return fig    
-
+        return fig
 
 
     def save_results(self):
@@ -109,7 +180,7 @@ class Simulator:
             "best": self.best_score(),
             "worst": self.worst_score(),
             "std_dev": self.standard_deviation(),
-            "Bonus percentage": sum(1 for sc in self.game_scorecards if sc.has_bonus()) / self.number_of_games * 100 if self.number_of_games > 0 else 0.0,
+            "Bonus percentage": self.get_bonus_percentage(),
             "number_of_games": self.number_of_games,
             "time": timestamp
         }
@@ -125,5 +196,10 @@ class Simulator:
             plt.close(histogram)
 
         # Plot Upper section score frequencies
+        upper_histogram = self.plot_upper_section_frequencies()
+        upper_histogram_file = os.path.join(run_folder, "upper_section_histogram.png")
+        if upper_histogram is not None:
+            upper_histogram.savefig(upper_histogram_file)
+            plt.close(upper_histogram)
 
         print(f"Results saved in folder: {run_folder}")

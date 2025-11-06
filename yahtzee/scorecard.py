@@ -38,10 +38,9 @@ class Scorecard:
     def has_bonus(self) -> bool:
         """Return True if the upper section bonus has been achieved."""
         return self.upper_section_score() >= 63
-
-    def upper_section_score(self) -> int:
-        """Return the subtotal for the upper section (ones–sixes)."""
-        upper = [
+    
+    def upper_categories(self) -> list[Category]:
+        return [
             Category.ONES,
             Category.TWOS,
             Category.THREES,
@@ -49,7 +48,13 @@ class Scorecard:
             Category.FIVES,
             Category.SIXES,
         ]
-        return sum(self.scores[c] or 0 for c in upper)
+    
+    def is_upper_section(self, cat: Category) -> bool:
+        return cat in self.upper_categories()
+
+    def upper_section_score(self) -> int:
+        """Return the subtotal for the upper section (ones–sixes)."""
+        return sum(self.scores[c] or 0 for c in self.upper_categories())
 
     def score_for_category(self, dice: Dice, category: Category) -> int:
         """Return the points this roll would score in the given category."""
@@ -100,7 +105,6 @@ class Scorecard:
         if self.scores[category] is not None:
             raise ValueError(f"Category {category} already filled.")
         self.scores[category] = self.score_for_category(dice, category)
-
 
     def get_available_categories_with_scores(self, dice: Dice) -> Dict[Category, int]:
         """Return a dictionary of available categories that give a nonzero score."""
