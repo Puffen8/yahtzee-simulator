@@ -1,5 +1,5 @@
 from typing import Dict, List
-from yahtzee.score_category import Category
+from yahtzee_simulator.score_category import Category
 
 
 def get_least_worth_category_left(categories: List[Category]) -> Category:

@@ -1,6 +1,6 @@
 import unittest
-from yahtzee.scorecard import Scorecard
-from yahtzee.score_category import Category
+from yahtzee_simulator.scorecard import Scorecard
+from yahtzee_simulator.score_category import Category
 
 class TestScorecard(unittest.TestCase):
     def setUp(self):

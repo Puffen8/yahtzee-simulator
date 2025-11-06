@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from yahtzee.score_category import Category, Dice
+from yahtzee_simulator.score_category import Category, Dice
 
 
 class DecisionType(Enum):

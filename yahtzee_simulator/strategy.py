@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
-from yahtzee.score_category import Category, Dice
-from yahtzee.scorecard import Scorecard
+from yahtzee_simulator.score_category import Category, Dice
+from yahtzee_simulator.scorecard import Scorecard
 
 class Strategy(ABC):
     """Abstract base class for Yahtzee strategies."""

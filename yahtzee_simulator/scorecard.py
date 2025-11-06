@@ -1,6 +1,6 @@
 from enum import Enum, auto
 from typing import Dict, List, Optional, Tuple
-from yahtzee.score_category import Category, Dice
+from yahtzee_simulator.score_category import Category, Dice
 
 class Scorecard:
     """Represents a Yahtzee scorecard."""

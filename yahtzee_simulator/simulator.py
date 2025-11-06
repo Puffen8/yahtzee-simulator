@@ -1,17 +1,13 @@
-from yahtzee.game import Game
-from yahtzee.strategy import Strategy
-from yahtzee.scorecard import Scorecard
+from yahtzee_simulator.game import Game
+from yahtzee_simulator.strategy import Strategy
+from yahtzee_simulator.scorecard import Scorecard
 
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 
-
-from collections import Counter
-
 import os
 import json
-import csv
 from datetime import datetime
 
 from typing import List, Optional

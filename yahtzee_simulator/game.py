@@ -1,8 +1,8 @@
-from yahtzee.scorecard import Scorecard
-from yahtzee.score_category import Category
+from yahtzee_simulator.scorecard import Scorecard
+from yahtzee_simulator.score_category import Category
 from random import randint
-from yahtzee.score_category import Dice
-from yahtzee.strategy import Strategy
+from yahtzee_simulator.score_category import Dice
+from yahtzee_simulator.strategy import Strategy
 
 
 
