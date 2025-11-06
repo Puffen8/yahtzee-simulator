@@ -1,10 +1,6 @@
-import sys
-import os
 import unittest
 from yahtzee.scorecard import Scorecard
 from yahtzee.score_category import Category
-
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 class TestScorecard(unittest.TestCase):
     def setUp(self):
