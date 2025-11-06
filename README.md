@@ -57,6 +57,8 @@ if __name__ == "__main__":
     simulator.run()
     simulator.print_summary()
 
+```
+```python
 # 3) If you want you can create your own strategy by extending the Strategy abstract class
 from yahtzee_simulator import *
 
