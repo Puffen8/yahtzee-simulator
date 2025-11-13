@@ -7,7 +7,7 @@ A configurable **Yahtzee game simulator** Python package for running automated g
 ![Matplotlib](https://img.shields.io/badge/Matplotlib-3.8-blue)
 
 ## Overview
-Run thousands of Yahtzee games automatically and test strategies by extending a simple `Strategy` template. Useful for analyzing probability, decision-making logic, and algorithmic optimization.
+Automatically run thousands of Yahtzee games and test strategies by extending a simple `Strategy` template. The package provides detailed feedback on strategy performance, making it easy to analyze probabilities, decision-making logic, and optimize algorithms. Users can leverage this framework to develop strategies using techniques like Monte Carlo simulations or machine learning if they wish.
 
 ## Features
 - Install the package using `pip` and import easily in Python
